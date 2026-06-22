@@ -1,0 +1,27 @@
+{
+  "name": "dino-monitor",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "DinoMom - Monitor de presion arterial para embarazo con tematica de dinosaurios",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "node --watch server/index.js",
+    "dev:client": "npm run dev --prefix client",
+    "build": "npm run build --prefix client",
+    "start": "node server/index.js",
+    "postinstall": "npm install --prefix client"
+  },
+  "keywords": ["pregnancy", "blood-pressure", "monitor"],
+  "license": "UNLICENSED",
+  "dependencies": {
+    "better-sqlite3": "^12.11.1",
+    "cors": "^2.8.6",
+    "date-fns": "^4.4.0",
+    "express": "^5.2.1",
+    "pdfkit": "^0.19.1"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3"
+  }
+}
