@@ -23,7 +23,7 @@ WORKDIR /app
 
 # Install only production server dependencies
 COPY package.json package-lock.json* ./
-RUN npm install --omit=dev
+RUN npm install --omit=dev --ignore-scripts
 
 # Copy server code
 COPY server ./server
