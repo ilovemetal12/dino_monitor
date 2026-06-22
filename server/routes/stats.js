@@ -23,31 +23,30 @@ export default function statsRouter(db) {
   const router = Router();
 
   /** GET /summary - Full dashboard summary (today, week averages, trend data). */
-  router.get('/summary', (_req, res) => {
-    const today = new Date().toISOString().split('T')[0];
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    const weekAgoStr = weekAgo.toISOString().split('T')[0];
+  router.get('/summary', async (_req, res) => {
+    const { rows: todayReadings } = await db.query(
+      'SELECT * FROM readings WHERE date = CURRENT_DATE ORDER BY created_at DESC'
+    );
 
-    const todayReadings = db.prepare(
-      'SELECT * FROM readings WHERE date = ? ORDER BY created_at DESC'
-    ).all(today);
+    const { rows: [weekAvg] } = await db.query(`
+      SELECT ROUND(AVG(systolic)::numeric, 1) as avg_systolic,
+             ROUND(AVG(diastolic)::numeric, 1) as avg_diastolic,
+             ROUND(AVG(pulse)::numeric, 1) as avg_pulse,
+             COUNT(*)::int as total_readings
+      FROM readings WHERE date >= CURRENT_DATE - INTERVAL '7 days'
+    `);
 
-    const weekAvg = db.prepare(`
-      SELECT ROUND(AVG(systolic),1) as avg_systolic, ROUND(AVG(diastolic),1) as avg_diastolic,
-             ROUND(AVG(pulse),1) as avg_pulse, COUNT(*) as total_readings
-      FROM readings WHERE date >= ?
-    `).get(weekAgoStr);
-
-    const lastReading = db.prepare(
+    const { rows: lastRows } = await db.query(
       'SELECT * FROM readings ORDER BY created_at DESC LIMIT 1'
-    ).get();
+    );
+    const lastReading = lastRows[0] || null;
 
-    const dailyReadings = db.prepare(`
-      SELECT date, ROUND(AVG(systolic),1) as avg_systolic,
-             ROUND(AVG(diastolic),1) as avg_diastolic, COUNT(*) as count
-      FROM readings WHERE date >= ? GROUP BY date ORDER BY date ASC
-    `).all(weekAgoStr);
+    const { rows: dailyReadings } = await db.query(`
+      SELECT date, ROUND(AVG(systolic)::numeric, 1) as avg_systolic,
+             ROUND(AVG(diastolic)::numeric, 1) as avg_diastolic, COUNT(*)::int as count
+      FROM readings WHERE date >= CURRENT_DATE - INTERVAL '7 days'
+      GROUP BY date ORDER BY date ASC
+    `);
 
     const classification = lastReading
       ? classifyBP(lastReading.systolic, lastReading.diastolic)
@@ -56,7 +55,7 @@ export default function statsRouter(db) {
     res.json({
       today: { readings: todayReadings, count: todayReadings.length, minimum_required: 2 },
       week: weekAvg,
-      last_reading: lastReading || null,
+      last_reading: lastReading,
       daily_readings: dailyReadings,
       classification
     });

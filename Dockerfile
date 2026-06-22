@@ -34,12 +34,9 @@ COPY --from=builder /app/client/dist ./client/dist
 # Copy static assets (dino images)
 COPY assets ./assets
 
-# Create persistent data directory for SQLite
-RUN mkdir -p data
-
 ENV NODE_ENV=production
 
-# Railway provides PORT at runtime; default to 3333 for local Docker testing
+# Railway provides PORT at runtime
 EXPOSE ${PORT:-3333}
 
 CMD ["node", "server/index.js"]

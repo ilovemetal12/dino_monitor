@@ -1,43 +1,47 @@
 /**
- * Database initialization and schema management.
- * Uses SQLite via better-sqlite3 for zero-config persistence.
+ * Database initialization and connection pool.
+ * Uses PostgreSQL via node-postgres (pg).
+ * Reads DATABASE_URL from environment (provided by Railway).
  */
 
-import Database from 'better-sqlite3';
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
+import pg from 'pg';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const { Pool } = pg;
+
+/** Singleton pool instance */
+let pool;
 
 /**
- * Initializes the SQLite database with required tables and default settings.
- * Creates the data directory if it doesn't exist.
- * @returns {Database} better-sqlite3 database instance
+ * Returns the shared connection pool, creating it on first call.
+ * Also runs migrations to ensure tables exist.
  */
-export function initDb() {
-  const dbPath = process.env.DB_PATH || path.join(__dirname, '..', 'data', 'dino_monitor.db');
+export async function getDb() {
+  if (pool) return pool;
 
-  // Ensure data directory exists
-  const dataDir = path.dirname(dbPath);
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  });
 
-  const db = new Database(dbPath);
-  db.pragma('journal_mode = WAL');
+  await migrate(pool);
+  return pool;
+}
 
-  db.exec(`
+/**
+ * Creates tables and seeds default settings if they don't exist.
+ */
+async function migrate(pool) {
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS readings (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id SERIAL PRIMARY KEY,
       systolic INTEGER NOT NULL,
       diastolic INTEGER NOT NULL,
       pulse INTEGER,
       position TEXT DEFAULT 'sentada',
       arm TEXT DEFAULT 'izquierdo',
       notes TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      date TEXT NOT NULL DEFAULT (date('now'))
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      date DATE NOT NULL DEFAULT CURRENT_DATE
     );
 
     CREATE TABLE IF NOT EXISTS settings (
@@ -50,12 +54,18 @@ export function initDb() {
   `);
 
   // Seed default settings (only inserts if key doesn't exist)
-  const insert = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
-  insert.run('due_date', '2027-01-29');
-  insert.run('baby_name', 'Bebito Dino');
-  insert.run('reminder_times', JSON.stringify(['08:00', '20:00']));
-  insert.run('mama_name', 'Mama');
-  insert.run('pin', '2604');
+  const defaults = [
+    ['due_date', '2027-01-29'],
+    ['baby_name', 'Bebito Dino'],
+    ['reminder_times', JSON.stringify(['08:00', '20:00'])],
+    ['mama_name', 'Mama'],
+    ['pin', '2604']
+  ];
 
-  return db;
+  for (const [key, value] of defaults) {
+    await pool.query(
+      'INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING',
+      [key, value]
+    );
+  }
 }

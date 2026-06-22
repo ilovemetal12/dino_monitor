@@ -25,24 +25,25 @@ export default function reportsRouter(db) {
    * GET /pdf - Generate a PDF report for a date range.
    * Query params: from (YYYY-MM-DD), to (YYYY-MM-DD)
    */
-  router.get('/pdf', (req, res) => {
+  router.get('/pdf', async (req, res) => {
     const { from, to } = req.query;
 
     if (!from || !to) {
       return res.status(400).json({ error: 'Se requieren fechas "from" y "to"' });
     }
 
-    const readings = db.prepare(
-      'SELECT * FROM readings WHERE date >= ? AND date <= ? ORDER BY created_at ASC'
-    ).all(from, to);
+    const { rows: readings } = await db.query(
+      'SELECT * FROM readings WHERE date >= $1 AND date <= $2 ORDER BY created_at ASC',
+      [from, to]
+    );
 
-    const stats = db.prepare(`
-      SELECT ROUND(AVG(systolic),1) as avg_systolic, ROUND(AVG(diastolic),1) as avg_diastolic,
-             ROUND(AVG(pulse),1) as avg_pulse, MAX(systolic) as max_systolic,
+    const { rows: [stats] } = await db.query(`
+      SELECT ROUND(AVG(systolic)::numeric,1) as avg_systolic, ROUND(AVG(diastolic)::numeric,1) as avg_diastolic,
+             ROUND(AVG(pulse)::numeric,1) as avg_pulse, MAX(systolic) as max_systolic,
              MIN(systolic) as min_systolic, MAX(diastolic) as max_diastolic,
-             MIN(diastolic) as min_diastolic, COUNT(*) as total
-      FROM readings WHERE date >= ? AND date <= ?
-    `).get(from, to);
+             MIN(diastolic) as min_diastolic, COUNT(*)::int as total
+      FROM readings WHERE date >= $1 AND date <= $2
+    `, [from, to]);
 
     // --- Build PDF ---
     const doc = new PDFDocument({
@@ -105,8 +106,10 @@ export default function reportsRouter(db) {
         doc.rect(50, y, doc.page.width - 100, 18).fill(i % 2 === 0 ? '#ffffff' : COLORS.rowAlt);
         doc.fillColor(COLORS.textMid);
 
-        const rDate = format(parseISO(reading.created_at), 'dd/MM/yyyy', { locale: es });
-        const rTime = format(parseISO(reading.created_at), 'HH:mm', { locale: es });
+        const createdAt = reading.created_at instanceof Date ? reading.created_at : new Date(reading.created_at);
+        const rDate = format(createdAt, 'dd/MM/yyyy', { locale: es });
+        const rTime = format(createdAt, 'HH:mm', { locale: es });
+
         doc.text(rDate, 60, y + 5);
         doc.text(rTime, 150, y + 5);
         doc.text(`${reading.systolic}`, 220, y + 5);

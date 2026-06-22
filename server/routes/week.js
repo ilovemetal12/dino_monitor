@@ -57,17 +57,18 @@ const BABY_SIZES = {
 /**
  * Returns the due date from settings or the default.
  */
-function getDueDate(db) {
-  const row = db.prepare("SELECT value FROM settings WHERE key = 'due_date'").get();
-  return row ? row.value : '2027-01-29';
+async function getDueDate(db) {
+  const { rows } = await db.query("SELECT value FROM settings WHERE key = 'due_date'");
+  return rows[0]?.value || '2027-01-29';
 }
 
 export default function weekRouter(db) {
   const router = Router();
 
   /** GET /current - Current gestational week, baby size, trimester, progress. */
-  router.get('/current', (_req, res) => {
-    const dueDate = parseISO(getDueDate(db));
+  router.get('/current', async (_req, res) => {
+    const dueDateStr = await getDueDate(db);
+    const dueDate = parseISO(dueDateStr);
     const today = new Date();
 
     const daysRemaining = differenceInDays(dueDate, today);
@@ -92,7 +93,7 @@ export default function weekRouter(db) {
       trimester,
       progress,
       days_remaining: Math.max(0, daysRemaining),
-      due_date: getDueDate(db),
+      due_date: dueDateStr,
       baby: babySize,
       label: `Semana ${weeksElapsed} + ${daysExtra} dias`
     });

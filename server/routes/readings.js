@@ -18,21 +18,28 @@ export default function readingsRouter(db) {
    * GET / - List readings with optional date filters.
    * Query params: date, from, to, limit (default 50), offset (default 0)
    */
-  router.get('/', (req, res) => {
+  router.get('/', async (req, res) => {
     const { date, from, to, limit = 50, offset = 0 } = req.query;
 
     const conditions = [];
     const params = [];
+    let paramIndex = 1;
 
-    if (date) { conditions.push('date = ?'); params.push(date); }
-    if (from) { conditions.push('date >= ?'); params.push(from); }
-    if (to) { conditions.push('date <= ?'); params.push(to); }
+    if (date) { conditions.push(`date = $${paramIndex++}`); params.push(date); }
+    if (from) { conditions.push(`date >= $${paramIndex++}`); params.push(from); }
+    if (to) { conditions.push(`date <= $${paramIndex++}`); params.push(to); }
 
     const where = conditions.length > 0 ? ` WHERE ${conditions.join(' AND ')}` : '';
-    const readings = db.prepare(`SELECT * FROM readings${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`)
-      .all(...params, Number(limit), Number(offset));
 
-    const { count } = db.prepare(`SELECT COUNT(*) as count FROM readings${where}`).get(...params);
+    const { rows: readings } = await db.query(
+      `SELECT * FROM readings${where} ORDER BY created_at DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
+      [...params, Number(limit), Number(offset)]
+    );
+
+    const { rows: [{ count }] } = await db.query(
+      `SELECT COUNT(*)::int as count FROM readings${where}`,
+      params
+    );
 
     res.json({ readings, total: count });
   });
@@ -41,21 +48,22 @@ export default function readingsRouter(db) {
    * GET /today/count - Returns today's reading count vs minimum required.
    * Must be defined before /:id to avoid route conflict.
    */
-  router.get('/today/count', (_req, res) => {
-    const today = new Date().toISOString().split('T')[0];
-    const { count } = db.prepare('SELECT COUNT(*) as count FROM readings WHERE date = ?').get(today);
+  router.get('/today/count', async (_req, res) => {
+    const { rows: [{ count }] } = await db.query(
+      "SELECT COUNT(*)::int as count FROM readings WHERE date = CURRENT_DATE"
+    );
     res.json({ count, minimum: DAILY_MINIMUM });
   });
 
   /** GET /:id - Fetch a single reading by ID. */
-  router.get('/:id', (req, res) => {
-    const reading = db.prepare('SELECT * FROM readings WHERE id = ?').get(req.params.id);
-    if (!reading) return res.status(404).json({ error: 'Registro no encontrado' });
-    res.json(reading);
+  router.get('/:id', async (req, res) => {
+    const { rows } = await db.query('SELECT * FROM readings WHERE id = $1', [req.params.id]);
+    if (rows.length === 0) return res.status(404).json({ error: 'Registro no encontrado' });
+    res.json(rows[0]);
   });
 
   /** POST / - Create a new blood pressure reading. */
-  router.post('/', (req, res) => {
+  router.post('/', async (req, res) => {
     const { systolic, diastolic, pulse, position, arm, notes } = req.body;
 
     if (!systolic || !diastolic) {
@@ -66,18 +74,19 @@ export default function readingsRouter(db) {
       return res.status(400).json({ error: 'Valores fuera de rango valido' });
     }
 
-    const result = db.prepare(
-      'INSERT INTO readings (systolic, diastolic, pulse, position, arm, notes) VALUES (?, ?, ?, ?, ?, ?)'
-    ).run(systolic, diastolic, pulse || null, position || 'sentada', arm || 'izquierdo', notes || null);
+    const { rows } = await db.query(
+      `INSERT INTO readings (systolic, diastolic, pulse, position, arm, notes)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [systolic, diastolic, pulse || null, position || 'sentada', arm || 'izquierdo', notes || null]
+    );
 
-    const newReading = db.prepare('SELECT * FROM readings WHERE id = ?').get(result.lastInsertRowid);
-    res.status(201).json(newReading);
+    res.status(201).json(rows[0]);
   });
 
   /** DELETE /:id - Delete a reading by ID. */
-  router.delete('/:id', (req, res) => {
-    const { changes } = db.prepare('DELETE FROM readings WHERE id = ?').run(req.params.id);
-    if (changes === 0) return res.status(404).json({ error: 'Registro no encontrado' });
+  router.delete('/:id', async (req, res) => {
+    const { rowCount } = await db.query('DELETE FROM readings WHERE id = $1', [req.params.id]);
+    if (rowCount === 0) return res.status(404).json({ error: 'Registro no encontrado' });
     res.json({ success: true });
   });
 

@@ -12,14 +12,18 @@
     "start": "node server/index.js",
     "postinstall": "npm install --prefix client"
   },
-  "keywords": ["pregnancy", "blood-pressure", "monitor"],
+  "keywords": [
+    "pregnancy",
+    "blood-pressure",
+    "monitor"
+  ],
   "license": "UNLICENSED",
   "dependencies": {
-    "better-sqlite3": "^12.11.1",
     "cors": "^2.8.6",
     "date-fns": "^4.4.0",
     "express": "^5.2.1",
-    "pdfkit": "^0.19.1"
+    "pdfkit": "^0.19.1",
+    "pg": "^8.22.0"
   },
   "devDependencies": {
     "concurrently": "^10.0.3"
