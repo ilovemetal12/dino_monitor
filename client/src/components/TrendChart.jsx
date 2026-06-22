@@ -48,11 +48,11 @@ export default function TrendChart({ data }) {
       <div className="flex gap-3 mt-2 mb-2">
         <div className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full bg-blush-deep" />
-          <span className="text-[0.65rem] text-text-light">Sistolica</span>
+          <span className="text-[0.65rem] text-text-light">Sistólica</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full bg-mint-deep" />
-          <span className="text-[0.65rem] text-text-light">Diastolica</span>
+          <span className="text-[0.65rem] text-text-light">Diastólica</span>
         </div>
       </div>
 

@@ -34,7 +34,7 @@ export default function Home() {
       {/* Header */}
       <header className="flex justify-between items-center mb-5">
         <div>
-          <h2 className="font-fredoka text-xl font-bold text-text-dark">Hola, Dinomama</h2>
+          <h2 className="font-fredoka text-xl font-bold text-text-dark">Hola, Dinomamá</h2>
           <p className="text-xs text-text-light">
             {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
           </p>
@@ -99,15 +99,15 @@ export default function Home() {
 
 function getGreeting() {
   const hour = new Date().getHours();
-  if (hour < 12) return 'Buenos dias, Dinomama!';
-  if (hour < 18) return 'Buenas tardes, Dinomama!';
-  return 'Buenas noches, Dinomama!';
+  if (hour < 12) return 'Buenos días, Dinomamá!';
+  if (hour < 18) return 'Buenas tardes, Dinomamá!';
+  return 'Buenas noches, Dinomamá!';
 }
 
 function getMotivation(summary) {
-  if (!summary?.last_reading) return 'Registra tu primera lectura del dia para empezar.';
-  if (summary.classification === 'normal') return 'Tus lecturas van muy bien esta semana. Sigue asi!';
-  if (summary.classification === 'elevada') return 'Tu presion esta un poco elevada. Recuerda descansar y hablar con tu doctor.';
-  if (summary.classification === 'alta') return 'Tu presion esta alta. Por favor contacta a tu medico lo antes posible.';
+  if (!summary?.last_reading) return 'Registra tu primera lectura del día para empezar.';
+  if (summary.classification === 'normal') return 'Tus lecturas van muy bien esta semana. Sigue así!';
+  if (summary.classification === 'elevada') return 'Tu presión está un poco elevada. Recuerda descansar y hablar con tu doctor.';
+  if (summary.classification === 'alta') return 'Tu presión está alta. Por favor contacta a tu médico lo antes posible.';
   return 'Recuerda tomar tus lecturas hoy.';
 }

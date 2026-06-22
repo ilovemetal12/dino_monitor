@@ -58,7 +58,7 @@ async function migrate(pool) {
     ['due_date', '2027-01-29'],
     ['baby_name', 'Bebito Dino'],
     ['reminder_times', JSON.stringify(['08:00', '20:00'])],
-    ['mama_name', 'Dinomama'],
+    ['mama_name', 'Dinomamá'],
     ['pin', '2604']
   ];
 

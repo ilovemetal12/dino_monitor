@@ -48,7 +48,7 @@ export default function Reports() {
       return;
     }
     const url = `${window.location.origin}${api.getReportUrl(from, to)}`;
-    const text = encodeURIComponent(`Reporte de presion arterial DinoMom (${from} a ${to}): ${url}`);
+    const text = encodeURIComponent(`Reporte de presión arterial DinoMom (${from} a ${to}): ${url}`);
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 

@@ -49,7 +49,7 @@ export default function reportsRouter(db) {
     const doc = new PDFDocument({
       size: 'A4',
       margin: 50,
-      info: { Title: 'DinoMom - Reporte de Presion Arterial', Author: 'DinoMom App' }
+      info: { Title: 'DinoMom - Reporte de Presión Arterial', Author: 'DinoMom App' }
     });
 
     res.setHeader('Content-Type', 'application/pdf');
@@ -59,7 +59,7 @@ export default function reportsRouter(db) {
     // Header
     doc.rect(0, 0, doc.page.width, 120).fill(COLORS.headerBg);
     doc.fontSize(24).font('Helvetica-Bold').fillColor(COLORS.textDark).text('DinoMom', 50, 35);
-    doc.fontSize(10).font('Helvetica').fillColor(COLORS.textMid).text('Reporte de Presion Arterial', 50, 62);
+    doc.fontSize(10).font('Helvetica').fillColor(COLORS.textMid).text('Reporte de Presión Arterial', 50, 62);
 
     const fromFmt = format(parseISO(from), "d 'de' MMMM, yyyy", { locale: es });
     const toFmt = format(parseISO(to), "d 'de' MMMM, yyyy", { locale: es });
@@ -73,8 +73,8 @@ export default function reportsRouter(db) {
     if (stats.total > 0) {
       doc.fontSize(9).font('Helvetica').fillColor(COLORS.textMid);
       doc.text(`Total de registros: ${stats.total}`, 70, 175);
-      doc.text(`Sistolica promedio: ${stats.avg_systolic} mmHg (min: ${stats.min_systolic}, max: ${stats.max_systolic})`, 70, 190);
-      doc.text(`Diastolica promedio: ${stats.avg_diastolic} mmHg (min: ${stats.min_diastolic}, max: ${stats.max_diastolic})`, 70, 205);
+      doc.text(`Sistólica promedio: ${stats.avg_systolic} mmHg (min: ${stats.min_systolic}, max: ${stats.max_systolic})`, 70, 190);
+      doc.text(`Diastólica promedio: ${stats.avg_diastolic} mmHg (min: ${stats.min_diastolic}, max: ${stats.max_diastolic})`, 70, 205);
       doc.text(`Pulso promedio: ${stats.avg_pulse || 'N/A'} bpm`, 70, 220);
     } else {
       doc.fontSize(9).font('Helvetica').fillColor(COLORS.textMid).text('No hay registros en este periodo.', 70, 175);
@@ -91,10 +91,10 @@ export default function reportsRouter(db) {
       doc.fontSize(8).font('Helvetica-Bold').fillColor(COLORS.textDark);
       doc.text('Fecha', 60, y + 6);
       doc.text('Hora', 150, y + 6);
-      doc.text('Sistolica', 220, y + 6);
-      doc.text('Diastolica', 290, y + 6);
+      doc.text('Sistólica', 220, y + 6);
+      doc.text('Diastólica', 290, y + 6);
       doc.text('Pulso', 370, y + 6);
-      doc.text('Posicion', 430, y + 6);
+      doc.text('Posición', 430, y + 6);
       y += 22;
 
       // Table rows

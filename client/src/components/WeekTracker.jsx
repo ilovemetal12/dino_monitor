@@ -51,7 +51,7 @@ export default function WeekTracker({ week }) {
       {/* Days remaining */}
       <div className="mt-3 text-center">
         <span className="text-[0.7rem] text-text-light">
-          Faltan <strong className="text-text-dark">{week.days_remaining} dias</strong> para conocer a tu dino bebe
+          Faltan <strong className="text-text-dark">{week.days_remaining} días</strong> para conocer a tu dino bebé
         </span>
       </div>
     </section>

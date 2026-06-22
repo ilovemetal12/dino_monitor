@@ -67,11 +67,11 @@ export default function readingsRouter(db) {
     const { systolic, diastolic, pulse, position, arm, notes } = req.body;
 
     if (!systolic || !diastolic) {
-      return res.status(400).json({ error: 'Sistolica y diastolica son requeridas' });
+      return res.status(400).json({ error: 'Sistólica y diastólica son requeridas' });
     }
     if (systolic < BP_LIMITS.systolic.min || systolic > BP_LIMITS.systolic.max ||
         diastolic < BP_LIMITS.diastolic.min || diastolic > BP_LIMITS.diastolic.max) {
-      return res.status(400).json({ error: 'Valores fuera de rango valido' });
+      return res.status(400).json({ error: 'Valores fuera de rango válido' });
     }
 
     const { rows } = await db.query(

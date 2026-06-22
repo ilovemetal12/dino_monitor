@@ -14,7 +14,7 @@ export default function BpCard({ reading, classification }) {
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-mint-deep via-blush-deep to-sky-deep rounded-t-3xl" />
 
       <div className="flex justify-between items-center mb-4">
-        <span className="text-xs text-text-light font-semibold">Ultima Lectura</span>
+        <span className="text-xs text-text-light font-semibold">Última Lectura</span>
         <div className={`flex items-center gap-1.5 ${badge.bg} px-3 py-1 rounded-full`}>
           <div className={`w-2 h-2 ${badge.dot} rounded-full animate-pulse`} />
           <span className={`text-[0.7rem] font-bold ${badge.color}`}>{badge.text}</span>
@@ -33,7 +33,7 @@ export default function BpCard({ reading, classification }) {
       <div className="grid grid-cols-3 gap-3 bg-cream -mx-6 -mb-6 px-6 py-4 rounded-b-3xl mt-4">
         <Detail icon="heart" label="Pulso" value={reading.pulse ? `${reading.pulse} bpm` : '--'} bgColor="bg-blush" iconColor="text-pink-deep" />
         <Detail icon="clock" label="Hora" value={formatTime(reading.created_at)} bgColor="bg-sky" iconColor="text-sky-deep" />
-        <Detail icon="position" label="Posicion" value={reading.position || '--'} bgColor="bg-mint" iconColor="text-green-500" />
+        <Detail icon="position" label="Posición" value={reading.position || '--'} bgColor="bg-mint" iconColor="text-green-500" />
       </div>
     </section>
   );

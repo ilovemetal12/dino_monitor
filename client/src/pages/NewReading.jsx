@@ -28,15 +28,15 @@ export default function NewReading() {
     const diastolic = Number(form.diastolic);
 
     if (!systolic || !diastolic) {
-      setError('Sistolica y diastolica son requeridas');
+      setError('Sistólica y diastólica son requeridas');
       return;
     }
     if (systolic < 60 || systolic > 250) {
-      setError('Sistolica debe estar entre 60 y 250');
+      setError('Sistólica debe estar entre 60 y 250');
       return;
     }
     if (diastolic < 30 || diastolic > 150) {
-      setError('Diastolica debe estar entre 30 y 150');
+      setError('Diastólica debe estar entre 30 y 150');
       return;
     }
 
@@ -72,10 +72,10 @@ export default function NewReading() {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* BP Values */}
         <div className="bg-white rounded-3xl p-5 shadow-sm">
-          <h3 className="font-fredoka text-sm font-bold text-text-dark mb-4">Presion Arterial</h3>
+          <h3 className="font-fredoka text-sm font-bold text-text-dark mb-4">Presión Arterial</h3>
           <div className="flex gap-3 items-end">
             <div className="flex-1">
-              <label className="text-[0.68rem] text-text-light font-semibold block mb-1">Sistolica</label>
+              <label className="text-[0.68rem] text-text-light font-semibold block mb-1">Sistólica</label>
               <input
                 type="number"
                 inputMode="numeric"
@@ -87,7 +87,7 @@ export default function NewReading() {
             </div>
             <span className="text-2xl text-blush-deep font-fredoka pb-3">/</span>
             <div className="flex-1">
-              <label className="text-[0.68rem] text-text-light font-semibold block mb-1">Diastolica</label>
+              <label className="text-[0.68rem] text-text-light font-semibold block mb-1">Diastólica</label>
               <input
                 type="number"
                 inputMode="numeric"
@@ -116,7 +116,7 @@ export default function NewReading() {
         {/* Position & Arm */}
         <div className="bg-white rounded-3xl p-5 shadow-sm space-y-4">
           <div>
-            <label className="text-[0.68rem] text-text-light font-semibold block mb-2">Posicion</label>
+            <label className="text-[0.68rem] text-text-light font-semibold block mb-2">Posición</label>
             <div className="flex gap-2">
               {['sentada', 'acostada', 'de pie'].map(pos => (
                 <button
