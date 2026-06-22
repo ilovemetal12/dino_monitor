@@ -8,7 +8,7 @@ WORKDIR /app
 # Install root dependencies (needed for postinstall to run client install)
 COPY package.json package-lock.json* ./
 COPY client/package.json client/package-lock.json* ./client/
-RUN npm install --omit=dev && npm install --prefix client
+RUN npm install && npm install --prefix client
 
 # Copy client source and build
 COPY client ./client
