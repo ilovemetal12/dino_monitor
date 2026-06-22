@@ -26,7 +26,7 @@ export default function TodayStatus({ summary }) {
         </p>
         <p className="text-[0.68rem] text-text-mid">
           {isComplete
-            ? `${count} registros hoy. Excelente, mama!`
+            ? `${count} registros hoy. Excelente, Dinomama!`
             : `Te faltan ${minimum - count} registro(s) para hoy.`
           }
         </p>

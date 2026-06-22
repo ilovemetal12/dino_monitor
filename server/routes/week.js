@@ -31,7 +31,7 @@ const BABY_SIZES = {
   17: { size: '13 cm', comparison: 'una pera', description: 'Tu bebito dino es del tamano de una pera. Su esqueleto se endurece cada dia mas.' },
   18: { size: '14.2 cm', comparison: 'un pimiento', description: 'Tu pequeno dino mide como un pimiento. Ya puede bostezar e hipo.' },
   19: { size: '15.3 cm', comparison: 'un mango', description: 'Tu dino bebe tiene el tamano de un mango. Sus sentidos se desarrollan rapidamente.' },
-  20: { size: '16.4 cm', comparison: 'un platano', description: 'Tu bebito dino mide como un platano. Ya estas a la mitad del camino, mama.' },
+  20: { size: '16.4 cm', comparison: 'un platano', description: 'Tu bebito dino mide como un platano. Ya estas a la mitad del camino, Dinomama.' },
   21: { size: '26.7 cm', comparison: 'una zanahoria grande', description: 'Tu pequeno dino es como una zanahoria grande. Sus cejas y parpados ya estan formados.' },
   22: { size: '27.8 cm', comparison: 'una papaya pequena', description: 'Tu dino bebe mide como una papaya pequena. Ya puede oir tu voz.' },
   23: { size: '28.9 cm', comparison: 'un mango grande', description: 'Tu bebito dino tiene el tamano de un mango grande. Su piel se vuelve menos transparente.' },
@@ -51,7 +51,7 @@ const BABY_SIZES = {
   37: { size: '48.6 cm', comparison: 'una acelga suiza', description: 'Tu dino bebe mide como un manojo de acelgas. Ya se considera a termino temprano.' },
   38: { size: '49.8 cm', comparison: 'un puerro grande', description: 'Tu bebito dino tiene el tamano de un puerro grande. Su cerebro y pulmones siguen madurando.' },
   39: { size: '50.7 cm', comparison: 'una sandia pequena', description: 'Tu pequeno dino es como una sandia pequena. Esta listo para conocerte pronto.' },
-  40: { size: '51.2 cm', comparison: 'una sandia', description: 'Tu dino bebe tiene el tamano de una sandia. Ya esta listo para salir del cascaron, mama.' }
+  40: { size: '51.2 cm', comparison: 'una sandia', description: 'Tu dino bebe tiene el tamano de una sandia. Ya esta listo para salir del cascaron, Dinomama.' }
 };
 
 /**

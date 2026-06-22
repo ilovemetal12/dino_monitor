@@ -34,7 +34,7 @@ export default function Home() {
       {/* Header */}
       <header className="flex justify-between items-center mb-5">
         <div>
-          <h2 className="font-fredoka text-xl font-bold text-text-dark">Hola, Mama</h2>
+          <h2 className="font-fredoka text-xl font-bold text-text-dark">Hola, Dinomama</h2>
           <p className="text-xs text-text-light">
             {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
           </p>
@@ -99,9 +99,9 @@ export default function Home() {
 
 function getGreeting() {
   const hour = new Date().getHours();
-  if (hour < 12) return 'Buenos dias, mama!';
-  if (hour < 18) return 'Buenas tardes, mama!';
-  return 'Buenas noches, mama!';
+  if (hour < 12) return 'Buenos dias, Dinomama!';
+  if (hour < 18) return 'Buenas tardes, Dinomama!';
+  return 'Buenas noches, Dinomama!';
 }
 
 function getMotivation(summary) {
