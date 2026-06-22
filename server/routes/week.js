@@ -19,7 +19,7 @@ const BABY_SIZES = {
   5: { size: '0.2 cm', comparison: 'una semilla de sesamo', description: 'Tu pequeno dino ya tiene el tamano de una semilla de sesamo. El corazoncito empieza a formarse.' },
   6: { size: '0.4 cm', comparison: 'una lenteja', description: 'Tu bebito dino es como una lentejita. Su corazon ya late rapidito.' },
   7: { size: '1 cm', comparison: 'un arandano', description: 'Tu dino bebe ya mide como un arandano. Se estan formando sus bracitos y piernitas.' },
-  8: { size: '1.6 cm', comparison: 'una frambuesa', description: 'Tu bebito dino es del tamano de una frambuesa. Ya se mueve aunque todavia no lo sientas.' },
+  8: { size: '2.03 cm', comparison: 'una frambuesa', description: 'Tu bebito dino es del tamano de una frambuesa. Ya se mueve aunque todavia no lo sientas.' },
   9: { size: '2.3 cm', comparison: 'una aceituna', description: 'Tu pequeno dino mide como una aceituna. Sus deditos empiezan a formarse.' },
   10: { size: '3.1 cm', comparison: 'una fresa', description: 'Tu dino bebe tiene el tamano de una fresa. Ya tiene todos sus organos principales.' },
   11: { size: '4.1 cm', comparison: 'un higo', description: 'Tu bebito dino mide como un higo. Sus huesitos se estan endureciendo.' },
