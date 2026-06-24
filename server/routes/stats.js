@@ -8,11 +8,13 @@ import { Router } from 'express';
 
 /**
  * Classifies blood pressure based on pregnancy guidelines.
+ * Uses the highest category reached by either value.
  * @param {number} systolic
  * @param {number} diastolic
- * @returns {'normal'|'elevada'|'alta'|'baja'}
+ * @returns {'muy_alta'|'alta'|'elevada'|'normal'|'baja'}
  */
 function classifyBP(systolic, diastolic) {
+  if (systolic >= 160 || diastolic >= 110) return 'muy_alta';
   if (systolic >= 140 || diastolic >= 90) return 'alta';
   if (systolic >= 130 || diastolic >= 80) return 'elevada';
   if (systolic < 90 || diastolic < 60) return 'baja';

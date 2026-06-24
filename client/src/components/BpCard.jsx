@@ -3,6 +3,7 @@ export default function BpCard({ reading, classification }) {
     normal: { text: 'Normal', bg: 'bg-mint', color: 'text-green-600', dot: 'bg-mint-deep' },
     elevada: { text: 'Elevada', bg: 'bg-yellow-50', color: 'text-yellow-700', dot: 'bg-yellow-400' },
     alta: { text: 'Alta', bg: 'bg-red-50', color: 'text-red-600', dot: 'bg-red-400' },
+    muy_alta: { text: 'Muy Alta', bg: 'bg-red-100', color: 'text-red-800', dot: 'bg-red-600' },
     baja: { text: 'Baja', bg: 'bg-sky', color: 'text-blue-600', dot: 'bg-sky-deep' },
   };
 

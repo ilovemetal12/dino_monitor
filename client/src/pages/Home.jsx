@@ -109,5 +109,7 @@ function getMotivation(summary) {
   if (summary.classification === 'normal') return 'Tus lecturas van muy bien esta semana. Sigue así!';
   if (summary.classification === 'elevada') return 'Tu presión está un poco elevada. Recuerda descansar y hablar con tu doctor.';
   if (summary.classification === 'alta') return 'Tu presión está alta. Por favor contacta a tu médico lo antes posible.';
+  if (summary.classification === 'muy_alta') return 'Tu presión está muy alta. Contacta a tu médico de urgencia.';
+  if (summary.classification === 'baja') return 'Tu presión está baja. Hidrátate y descansa. Consulta a tu médico si persiste.';
   return 'Recuerda tomar tus lecturas hoy.';
 }

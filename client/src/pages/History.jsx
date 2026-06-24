@@ -96,6 +96,7 @@ export default function History() {
 }
 
 function getBarColor(sys, dia) {
+  if (sys >= 160 || dia >= 110) return 'bg-red-600';
   if (sys >= 140 || dia >= 90) return 'bg-red-400';
   if (sys >= 130 || dia >= 80) return 'bg-yellow-400';
   if (sys < 90 || dia < 60) return 'bg-sky-deep';
