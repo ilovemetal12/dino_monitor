@@ -6,7 +6,13 @@
 
 import pg from 'pg';
 
-const { Pool } = pg;
+const { Pool, types } = pg;
+
+// Force pg to return DATE and TIMESTAMP as strings instead of JS Date objects.
+// This ensures consistent JSON serialization for the client.
+types.setTypeParser(1082, (val) => val);           // DATE → 'YYYY-MM-DD'
+types.setTypeParser(1114, (val) => val);           // TIMESTAMP → 'YYYY-MM-DD HH:MM:SS'
+types.setTypeParser(1184, (val) => val);           // TIMESTAMPTZ → ISO string
 
 /** Singleton pool instance */
 let pool;

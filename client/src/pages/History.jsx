@@ -26,7 +26,8 @@ export default function History() {
 
   // Group by date
   const grouped = readings.reduce((acc, r) => {
-    const date = r.date;
+    // Normalize date: could be Date object, ISO string, or 'YYYY-MM-DD'
+    const date = String(r.date).split('T')[0];
     if (!acc[date]) acc[date] = [];
     acc[date].push(r);
     return acc;
@@ -102,12 +103,19 @@ function getBarColor(sys, dia) {
 }
 
 function formatDate(dateStr) {
-  const date = new Date(dateStr + 'T12:00:00');
+  if (!dateStr) return 'Fecha desconocida';
+  // Handle both 'YYYY-MM-DD' and ISO formats
+  const cleaned = String(dateStr).split('T')[0];
+  const [year, month, day] = cleaned.split('-').map(Number);
+  if (!year || !month || !day) return 'Fecha desconocida';
+  const date = new Date(year, month - 1, day);
   return date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
 }
 
 function formatTime(dateStr) {
   if (!dateStr) return '';
+  // Handle 'YYYY-MM-DD HH:MM:SS+TZ' format from Postgres
   const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '';
   return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 }

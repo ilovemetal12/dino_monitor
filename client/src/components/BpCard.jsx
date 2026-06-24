@@ -76,5 +76,6 @@ function DetailIcon({ icon, className }) {
 function formatTime(dateStr) {
   if (!dateStr) return '--';
   const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '--';
   return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 }

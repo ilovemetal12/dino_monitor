@@ -77,7 +77,12 @@ export default function TrendChart({ data }) {
           {/* Day labels */}
           {data.map((d, i) => (
             <text key={i} x={scaleX(i)} y={height - 2} fill="#b89a9d" fontSize="8" textAnchor="middle" fontFamily="Nunito">
-              {days[new Date(d.date).getDay()] || days[i % 7]}
+              {(() => {
+                const cleaned = String(d.date).split('T')[0];
+                const [y, m, day] = cleaned.split('-').map(Number);
+                const dateObj = new Date(y, m - 1, day);
+                return days[dateObj.getDay()] || days[i % 7];
+              })()}
             </text>
           ))}
         </svg>
