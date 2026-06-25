@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 export default function TodayStatus({ summary }) {
   const count = summary?.today?.count || 0;
-  const minimum = 2;
+  const minimum = 3;
   const isComplete = count >= minimum;
 
   return (

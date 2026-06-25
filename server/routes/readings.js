@@ -9,7 +9,7 @@ import { Router } from 'express';
 const BP_LIMITS = { systolic: { min: 60, max: 250 }, diastolic: { min: 30, max: 150 } };
 
 /** Minimum daily readings required */
-const DAILY_MINIMUM = 2;
+const DAILY_MINIMUM = 3;
 
 export default function readingsRouter(db) {
   const router = Router();

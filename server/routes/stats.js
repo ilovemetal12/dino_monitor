@@ -55,7 +55,7 @@ export default function statsRouter(db) {
       : 'normal';
 
     res.json({
-      today: { readings: todayReadings, count: todayReadings.length, minimum_required: 2 },
+      today: { readings: todayReadings, count: todayReadings.length, minimum_required: 3 },
       week: weekAvg,
       last_reading: lastReading,
       daily_readings: dailyReadings,

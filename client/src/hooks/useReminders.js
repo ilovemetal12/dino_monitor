@@ -22,9 +22,9 @@ export function useReminders() {
         if (isReminderTime) {
           // Check if minimum readings done
           const summary = await api.getSummary();
-          if (summary.today.count < 2) {
+          if (summary.today.count < 3) {
             new Notification('DinoMom - Recordatorio', {
-              body: `Hola Dinomamá! Es hora de registrar tu presión arterial. Llevas ${summary.today.count} de 2 registros mínimos hoy.`,
+              body: `Hola Dinomamá! Es hora de registrar tu presión arterial. Llevas ${summary.today.count} de 3 registros mínimos hoy.`,
               icon: '/assets/dino-pink.png',
               tag: 'bp-reminder'
             });
