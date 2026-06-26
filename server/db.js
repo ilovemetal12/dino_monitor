@@ -32,9 +32,9 @@ export async function getDb() {
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
   });
 
-  // Set timezone to Venezuela (UTC-4) so all timestamps are in local time
+  // Set timezone to Mexico City (UTC-6) so all timestamps are in local time
   pool.on('connect', (client) => {
-    client.query("SET timezone = 'America/Caracas'");
+    client.query("SET timezone = 'America/Mexico_City'");
   });
 
   await migrate(pool);
