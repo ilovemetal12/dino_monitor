@@ -12,7 +12,10 @@ const { Pool, types } = pg;
 // This ensures consistent JSON serialization for the client.
 types.setTypeParser(1082, (val) => val);           // DATE → 'YYYY-MM-DD'
 types.setTypeParser(1114, (val) => val);           // TIMESTAMP → 'YYYY-MM-DD HH:MM:SS'
-types.setTypeParser(1184, (val) => val);           // TIMESTAMPTZ → ISO string
+types.setTypeParser(1184, (val) => {               // TIMESTAMPTZ → proper ISO 8601
+  // Postgres returns '2026-06-22 10:44:00-04', convert to ISO format with T separator
+  return val ? val.replace(' ', 'T') : val;
+});
 
 /** Singleton pool instance */
 let pool;
@@ -27,6 +30,11 @@ export async function getDb() {
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  });
+
+  // Set timezone to Venezuela (UTC-4) so all timestamps are in local time
+  pool.on('connect', (client) => {
+    client.query("SET timezone = 'America/Caracas'");
   });
 
   await migrate(pool);
