@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import PDFDocument from 'pdfkit';
 import { format, parseISO } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { es } from 'date-fns/locale';
 
 /** DinoMom color palette */
@@ -90,7 +91,7 @@ export default function reportsRouter(db) {
     const toFmt = format(parseISO(to), "d 'de' MMMM yyyy", { locale: es });
     doc.fontSize(9).fillColor(C.textMid);
     doc.text(`Período: ${fromFmt} — ${toFmt}`, 50, 78);
-    doc.text(`Generado: ${format(new Date(), "d 'de' MMMM yyyy, HH:mm", { locale: es })}`, 50, 92);
+    doc.text(`Generado: ${formatInTimeZone(new Date(), 'America/Mexico_City', "d 'de' MMMM yyyy, HH:mm", { locale: es })}`, 50, 92);
     doc.text(`Semana ${currentWeek} de embarazo`, 50, 106);
 
     // ===== SUMMARY =====
@@ -166,8 +167,8 @@ export default function reportsRouter(db) {
         try {
           const dt = new Date(r.created_at);
           if (!isNaN(dt.getTime())) {
-            rDate = format(dt, 'dd/MM/yyyy');
-            rTime = format(dt, 'HH:mm');
+            rDate = formatInTimeZone(dt, 'America/Mexico_City', 'dd/MM/yyyy');
+            rTime = formatInTimeZone(dt, 'America/Mexico_City', 'HH:mm');
           }
         } catch { /* fallback to -- */ }
 
