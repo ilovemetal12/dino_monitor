@@ -13,8 +13,15 @@ const { Pool, types } = pg;
 types.setTypeParser(1082, (val) => val);           // DATE → 'YYYY-MM-DD'
 types.setTypeParser(1114, (val) => val);           // TIMESTAMP → 'YYYY-MM-DD HH:MM:SS'
 types.setTypeParser(1184, (val) => {               // TIMESTAMPTZ → proper ISO 8601
-  // Postgres returns '2026-06-22 10:44:00-04', convert to ISO format with T separator
-  return val ? val.replace(' ', 'T') : val;
+  if (!val) return val;
+  // Postgres returns '2026-06-22 10:44:00-06' or '2026-06-22 10:44:00.123-06'
+  // Convert to proper ISO: '2026-06-22T10:44:00-06:00'
+  let iso = val.replace(' ', 'T');
+  // If offset is short like -06 or +05, expand to -06:00 or +05:00
+  if (/[+-]\d{2}$/.test(iso)) {
+    iso += ':00';
+  }
+  return iso;
 });
 
 /** Singleton pool instance */

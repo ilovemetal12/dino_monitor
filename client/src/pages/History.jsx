@@ -115,8 +115,13 @@ function formatDate(dateStr) {
 
 function formatTime(dateStr) {
   if (!dateStr) return '';
-  // Handle 'YYYY-MM-DD HH:MM:SS+TZ' format from Postgres
-  const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return '';
+  // Try parsing as-is first
+  let date = new Date(dateStr);
+  if (isNaN(date.getTime())) {
+    // Fallback: extract HH:MM directly from string
+    const match = String(dateStr).match(/(\d{2}):(\d{2})/);
+    if (match) return `${match[1]}:${match[2]}`;
+    return '';
+  }
   return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 }

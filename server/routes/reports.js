@@ -1,7 +1,6 @@
 /**
  * PDF report generation routes.
  * Generates themed blood pressure reports for a given date range.
- * Reports include summary statistics and a detailed readings table.
  */
 
 import { Router } from 'express';
@@ -9,54 +8,41 @@ import PDFDocument from 'pdfkit';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-/** DinoMom color palette for PDF theming */
-const COLORS = {
+/** DinoMom color palette */
+const C = {
   pink: '#ffb6c8',
   pinkDark: '#ff8fab',
   pinkLight: '#fff0f5',
   blush: '#ffe4ec',
   mint: '#a8e6cf',
-  mintLight: '#e8faf0',
   cream: '#fffcf7',
-  peach: '#fff0e8',
   textDark: '#3d2c2e',
   textMid: '#7a6062',
   textLight: '#b89a9d',
   white: '#ffffff',
-  rowAlt: '#fef9f5',
-  redBg: '#fff5f5',
-  yellowBg: '#fffde7',
-  greenBg: '#f0fdf4'
+  rowAlt: '#fef9f5'
 };
 
-/**
- * Classifies a reading for color-coding in the PDF table.
- */
-function classifyReading(systolic, diastolic) {
-  if (systolic >= 160 || diastolic >= 110) return 'muy_alta';
-  if (systolic >= 140 || diastolic >= 90) return 'alta';
-  if (systolic >= 130 || diastolic >= 80) return 'elevada';
-  if (systolic < 90 || diastolic < 60) return 'baja';
+/** BP classification */
+function classifyReading(sys, dia) {
+  if (sys >= 160 || dia >= 110) return 'muy_alta';
+  if (sys >= 140 || dia >= 90) return 'alta';
+  if (sys >= 130 || dia >= 80) return 'elevada';
+  if (sys < 90 || dia < 60) return 'baja';
   return 'normal';
 }
 
-function getRowBg(classification, index) {
-  switch (classification) {
-    case 'muy_alta': return '#ffe0e0';
-    case 'alta': return '#fff0f0';
-    case 'elevada': return '#fffde7';
-    case 'baja': return '#e8f4fd';
-    default: return index % 2 === 0 ? COLORS.white : COLORS.rowAlt;
-  }
-}
+const STATUS = {
+  muy_alta: { label: 'Muy Alta', color: '#dc2626', rowBg: '#fee2e2' },
+  alta: { label: 'Alta', color: '#ef4444', rowBg: '#fef2f2' },
+  elevada: { label: 'Elevada', color: '#ca8a04', rowBg: '#fefce8' },
+  normal: { label: 'Normal', color: '#16a34a', rowBg: null },
+  baja: { label: 'Baja', color: '#2563eb', rowBg: '#eff6ff' }
+};
 
 export default function reportsRouter(db) {
   const router = Router();
 
-  /**
-   * GET /pdf - Generate a PDF report for a date range.
-   * Query params: from (YYYY-MM-DD), to (YYYY-MM-DD)
-   */
   router.get('/pdf', async (req, res) => {
     const { from, to } = req.query;
 
@@ -77,197 +63,142 @@ export default function reportsRouter(db) {
       FROM readings WHERE date >= $1 AND date <= $2
     `, [from, to]);
 
-    // Get week info for context
+    // Get pregnancy week
     const { rows: settingsRows } = await db.query("SELECT value FROM settings WHERE key = 'due_date'");
     const dueDate = settingsRows[0]?.value || '2027-01-29';
-    const dueDateObj = parseISO(dueDate);
-    const today = new Date();
-    const daysRemaining = Math.floor((dueDateObj - today) / (1000 * 60 * 60 * 24));
-    const daysElapsed = 280 - daysRemaining;
-    const currentWeek = Math.floor(daysElapsed / 7);
+    const daysRemaining = Math.floor((parseISO(dueDate) - new Date()) / (1000 * 60 * 60 * 24));
+    const currentWeek = Math.floor((280 - daysRemaining) / 7);
 
     // --- Build PDF ---
-    const doc = new PDFDocument({
-      size: 'A4',
-      margin: 40,
-      info: { Title: 'DinoMom - Reporte de Presión Arterial', Author: 'DinoMom App' }
-    });
+    const doc = new PDFDocument({ size: 'A4', margin: 40 });
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=dinomom-reporte-${from}-${to}.pdf`);
     doc.pipe(res);
 
-    const pageWidth = doc.page.width;
-    const contentWidth = pageWidth - 80;
+    const pw = doc.page.width;
+    const cw = pw - 80; // content width
 
-    // ==========================================
-    // HEADER - Gradient-style banner
-    // ==========================================
-    doc.rect(0, 0, pageWidth, 130).fill(COLORS.pinkLight);
-    // Decorative circles
-    doc.circle(pageWidth - 40, 30, 60).fill('rgba(255,182,200,0.2)');
-    doc.circle(60, 100, 40).fill('rgba(168,230,207,0.15)');
+    // ===== HEADER =====
+    doc.rect(0, 0, pw, 125).fill(C.pinkLight);
+    doc.rect(0, 0, pw, 4).fill(C.pinkDark);
 
-    // Top accent bar
-    doc.rect(0, 0, pageWidth, 4).fill(COLORS.pinkDark);
+    doc.fontSize(26).font('Helvetica-Bold').fillColor(C.textDark).text('DinoMom', 50, 28);
+    doc.fontSize(10).font('Helvetica').fillColor(C.textMid).text('Reporte de Presión Arterial', 50, 58);
 
-    // Title
-    doc.fontSize(28).font('Helvetica-Bold').fillColor(COLORS.textDark).text('DinoMom', 50, 30);
-    doc.fontSize(11).font('Helvetica').fillColor(COLORS.textMid).text('Reporte de Presión Arterial', 50, 62);
+    const fromFmt = format(parseISO(from), "d 'de' MMMM yyyy", { locale: es });
+    const toFmt = format(parseISO(to), "d 'de' MMMM yyyy", { locale: es });
+    doc.fontSize(9).fillColor(C.textMid);
+    doc.text(`Período: ${fromFmt} — ${toFmt}`, 50, 78);
+    doc.text(`Generado: ${format(new Date(), "d 'de' MMMM yyyy, HH:mm", { locale: es })}`, 50, 92);
+    doc.text(`Semana ${currentWeek} de embarazo`, 50, 106);
 
-    // Date info
-    const fromFmt = format(parseISO(from), "d 'de' MMMM, yyyy", { locale: es });
-    const toFmt = format(parseISO(to), "d 'de' MMMM, yyyy", { locale: es });
-    doc.fontSize(9).fillColor(COLORS.textMid);
-    doc.text(`Período: ${fromFmt} — ${toFmt}`, 50, 85);
-    doc.text(`Generado: ${format(new Date(), "d 'de' MMMM, yyyy — HH:mm", { locale: es })}`, 50, 99);
-    doc.text(`Semana ${currentWeek} de embarazo`, 50, 113);
+    // ===== SUMMARY =====
+    let y = 145;
+    doc.rect(40, y, cw, 100).fill(C.white);
+    doc.rect(40, y, cw, 100).lineWidth(1).stroke(C.blush);
+    doc.rect(40, y, 4, 100).fill(C.pinkDark);
 
-    // ==========================================
-    // SUMMARY SECTION
-    // ==========================================
-    const summaryY = 150;
-    doc.roundedRect(40, summaryY, contentWidth, 105, 14).fill(COLORS.white).stroke(COLORS.blush);
-
-    // Section title with pink accent
-    doc.rect(40, summaryY, 5, 105).fill(COLORS.pinkDark);
-    doc.fontSize(12).font('Helvetica-Bold').fillColor(COLORS.textDark).text('Resumen del Período', 60, summaryY + 14);
+    doc.fontSize(11).font('Helvetica-Bold').fillColor(C.textDark).text('Resumen del Período', 56, y + 12);
 
     if (stats.total > 0) {
-      doc.fontSize(9).font('Helvetica').fillColor(COLORS.textMid);
-      doc.text(`Total de registros: ${stats.total}`, 60, summaryY + 36);
-      doc.text(`Sistólica promedio: ${stats.avg_systolic} mmHg  (mín: ${stats.min_systolic} / máx: ${stats.max_systolic})`, 60, summaryY + 52);
-      doc.text(`Diastólica promedio: ${stats.avg_diastolic} mmHg  (mín: ${stats.min_diastolic} / máx: ${stats.max_diastolic})`, 60, summaryY + 68);
-      doc.text(`Pulso promedio: ${stats.avg_pulse || 'N/A'} bpm`, 60, summaryY + 84);
+      doc.fontSize(9).font('Helvetica').fillColor(C.textMid);
+      doc.text(`Total de registros: ${stats.total}`, 56, y + 32);
+      doc.text(`Sistólica promedio: ${stats.avg_systolic} mmHg  (mín: ${stats.min_systolic} / máx: ${stats.max_systolic})`, 56, y + 48);
+      doc.text(`Diastólica promedio: ${stats.avg_diastolic} mmHg  (mín: ${stats.min_diastolic} / máx: ${stats.max_diastolic})`, 56, y + 64);
+      doc.text(`Pulso promedio: ${stats.avg_pulse || 'N/A'} bpm`, 56, y + 80);
     } else {
-      doc.fontSize(9).font('Helvetica').fillColor(COLORS.textMid).text('No hay registros en este período.', 60, summaryY + 36);
+      doc.fontSize(9).font('Helvetica').fillColor(C.textMid).text('No hay registros en este período.', 56, y + 32);
     }
 
-    // ==========================================
-    // CLASSIFICATION LEGEND
-    // ==========================================
-    const legendY = summaryY + 120;
-    doc.fontSize(8).font('Helvetica-Bold').fillColor(COLORS.textDark).text('Clasificación:', 40, legendY);
-    doc.font('Helvetica').fontSize(7).fillColor(COLORS.textMid);
-
-    const legends = [
-      { color: '#dc2626', label: 'Muy Alta (≥160/≥110)' },
-      { color: '#ef4444', label: 'Alta (≥140/≥90)' },
-      { color: '#eab308', label: 'Elevada (≥130/≥80)' },
-      { color: '#22c55e', label: 'Normal (90-129/60-79)' },
-      { color: '#3b82f6', label: 'Baja (<90/<60)' },
-    ];
-
-    let legendX = 120;
-    for (const { color, label } of legends) {
-      doc.circle(legendX, legendY + 4, 3).fill(color);
-      doc.fillColor(COLORS.textMid).text(label, legendX + 6, legendY, { continued: false });
-      legendX += 95;
+    // ===== LEGEND =====
+    y += 115;
+    doc.fontSize(8).font('Helvetica-Bold').fillColor(C.textDark).text('Clasificación:', 40, y);
+    let lx = 115;
+    doc.font('Helvetica').fontSize(7);
+    for (const [, { label, color }] of Object.entries(STATUS)) {
+      doc.circle(lx + 3, y + 4, 3).fill(color);
+      doc.fillColor(C.textMid).text(label, lx + 9, y);
+      lx += 75;
     }
 
-    // ==========================================
-    // READINGS TABLE
-    // ==========================================
+    // ===== TABLE =====
     if (readings.length > 0) {
-      let y = legendY + 25;
-
-      // Section title
-      doc.fontSize(12).font('Helvetica-Bold').fillColor(COLORS.textDark).text('Detalle de Registros', 40, y);
       y += 22;
+      doc.fontSize(11).font('Helvetica-Bold').fillColor(C.textDark).text('Detalle de Registros', 40, y);
+      y += 20;
 
-      // Table header
-      doc.roundedRect(40, y, contentWidth, 24, 6).fill(COLORS.blush);
-      doc.fontSize(8).font('Helvetica-Bold').fillColor(COLORS.textDark);
-      doc.text('Fecha', 52, y + 7);
-      doc.text('Hora', 130, y + 7);
-      doc.text('Sist.', 200, y + 7);
-      doc.text('Diast.', 260, y + 7);
-      doc.text('Pulso', 330, y + 7);
-      doc.text('Posición', 400, y + 7);
-      doc.text('Estado', 470, y + 7);
-      y += 24;
+      const drawHeader = (yPos) => {
+        doc.rect(40, yPos, cw, 22).fill(C.blush);
+        doc.fontSize(8).font('Helvetica-Bold').fillColor(C.textDark);
+        doc.text('Fecha', 50, yPos + 7);
+        doc.text('Hora', 125, yPos + 7);
+        doc.text('Sist.', 190, yPos + 7);
+        doc.text('Diast.', 240, yPos + 7);
+        doc.text('Pulso', 300, yPos + 7);
+        doc.text('Brazo', 360, yPos + 7);
+        doc.text('Posición', 420, yPos + 7);
+        doc.text('Estado', 490, yPos + 7);
+        return yPos + 22;
+      };
 
-      // Table rows
+      y = drawHeader(y);
+
       doc.font('Helvetica').fontSize(8);
       for (let i = 0; i < readings.length; i++) {
-        if (y > doc.page.height - 60) {
+        if (y > doc.page.height - 50) {
           doc.addPage();
           y = 40;
-          // Repeat header on new page
-          doc.roundedRect(40, y, contentWidth, 24, 6).fill(COLORS.blush);
-          doc.fontSize(8).font('Helvetica-Bold').fillColor(COLORS.textDark);
-          doc.text('Fecha', 52, y + 7);
-          doc.text('Hora', 130, y + 7);
-          doc.text('Sist.', 200, y + 7);
-          doc.text('Diast.', 260, y + 7);
-          doc.text('Pulso', 330, y + 7);
-          doc.text('Posición', 400, y + 7);
-          doc.text('Estado', 470, y + 7);
-          y += 24;
+          y = drawHeader(y);
           doc.font('Helvetica').fontSize(8);
         }
 
-        const reading = readings[i];
-        const classification = classifyReading(reading.systolic, reading.diastolic);
-        const rowBg = getRowBg(classification, i);
+        const r = readings[i];
+        const cls = classifyReading(r.systolic, r.diastolic);
+        const st = STATUS[cls];
+        const bg = st.rowBg || (i % 2 === 0 ? C.white : C.rowAlt);
 
-        doc.rect(40, y, contentWidth, 20).fill(rowBg);
-        doc.fillColor(COLORS.textMid);
+        doc.rect(40, y, cw, 19).fill(bg);
 
-        const createdAt = reading.created_at instanceof Date ? reading.created_at : new Date(reading.created_at);
-        const rDate = format(createdAt, 'dd/MM/yyyy', { locale: es });
-        const rTime = format(createdAt, 'HH:mm', { locale: es });
+        // Parse time safely
+        let rDate = '--';
+        let rTime = '--';
+        try {
+          const dt = new Date(r.created_at);
+          if (!isNaN(dt.getTime())) {
+            rDate = format(dt, 'dd/MM/yyyy');
+            rTime = format(dt, 'HH:mm');
+          }
+        } catch { /* fallback to -- */ }
 
-        doc.text(rDate, 52, y + 6);
-        doc.text(rTime, 130, y + 6);
+        doc.fillColor(C.textMid);
+        doc.text(rDate, 50, y + 5);
+        doc.text(rTime, 125, y + 5);
 
-        // Color-code the values based on classification
-        if (classification === 'muy_alta' || classification === 'alta') {
-          doc.fillColor('#dc2626');
-        } else if (classification === 'elevada') {
-          doc.fillColor('#b45309');
-        } else if (classification === 'baja') {
-          doc.fillColor('#2563eb');
-        } else {
-          doc.fillColor(COLORS.textDark);
-        }
-        doc.text(`${reading.systolic}`, 200, y + 6);
-        doc.text(`${reading.diastolic}`, 260, y + 6);
+        // Color-code BP values if abnormal
+        doc.fillColor(cls === 'normal' ? C.textDark : st.color);
+        doc.text(`${r.systolic}`, 190, y + 5);
+        doc.text(`${r.diastolic}`, 240, y + 5);
 
-        doc.fillColor(COLORS.textMid);
-        doc.text(`${reading.pulse || '—'}`, 330, y + 6);
-        doc.text(reading.position || '—', 400, y + 6);
+        doc.fillColor(C.textMid);
+        doc.text(`${r.pulse || '—'}`, 300, y + 5);
+        doc.text(r.arm || '—', 360, y + 5);
+        doc.text(r.position || '—', 420, y + 5);
 
-        // Status indicator
-        const statusLabels = {
-          muy_alta: 'Muy Alta',
-          alta: 'Alta',
-          elevada: 'Elevada',
-          normal: 'Normal',
-          baja: 'Baja'
-        };
-        const statusColors = {
-          muy_alta: '#dc2626',
-          alta: '#ef4444',
-          elevada: '#eab308',
-          normal: '#22c55e',
-          baja: '#3b82f6'
-        };
-        doc.circle(472, y + 10, 3).fill(statusColors[classification]);
-        doc.fillColor(COLORS.textMid).text(statusLabels[classification], 478, y + 6);
+        // Status dot + label
+        doc.circle(494, y + 10, 3).fill(st.color);
+        doc.fillColor(C.textMid).fontSize(7).text(st.label, 500, y + 6);
+        doc.fontSize(8);
 
-        y += 20;
+        y += 19;
       }
     }
 
-    // ==========================================
-    // FOOTER - Branding
-    // ==========================================
-    const footerY = doc.page.height - 30;
-    doc.fontSize(7).fillColor(COLORS.textLight).text(
+    // ===== FOOTER =====
+    const fy = doc.page.height - 25;
+    doc.fontSize(7).fillColor(C.textLight).text(
       'DinoMom — Monitor de Presión Arterial para Embarazo',
-      40, footerY,
-      { align: 'center', width: contentWidth }
+      40, fy, { align: 'center', width: cw }
     );
 
     doc.end();

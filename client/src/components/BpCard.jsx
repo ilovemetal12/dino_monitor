@@ -76,7 +76,11 @@ function DetailIcon({ icon, className }) {
 
 function formatTime(dateStr) {
   if (!dateStr) return '--';
-  const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return '--';
+  let date = new Date(dateStr);
+  if (isNaN(date.getTime())) {
+    const match = String(dateStr).match(/(\d{2}):(\d{2})/);
+    if (match) return `${match[1]}:${match[2]}`;
+    return '--';
+  }
   return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 }
